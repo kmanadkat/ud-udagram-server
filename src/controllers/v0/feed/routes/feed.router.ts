@@ -16,19 +16,37 @@ router.get('/', async (req: Request, res: Response) => {
 	res.send(items)
 })
 
-//@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+router.get('/:id', async(req: Request, res: Response) => {
+	const {id} = req.params
+	const feedItem = await FeedItem.findByPk(id)
+	if(feedItem) {
+		return res.status(200).json(feedItem)
+	}
+	return res.status(404).send(`Item with id ${id} not found`)
+})
 
 // update a specific resource
-router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
-	//@TODO try it yourself
-	res.status(500).send('not implemented')
+router.patch('/:id', async (req: Request, res: Response) => {
+	const {id} = req.params
+	const {caption,url} = req.body
+	const feedItem = await FeedItem.findByPk(id)
+	if(!feedItem) {
+		return res.status(404).send(`Item with id ${id} not found`)
+	}
+	if(caption) {
+		feedItem.caption = caption
+	}
+	if(url) {
+		feedItem.url = url
+	}
+	await feedItem.save()
+	res.status(201).json(feedItem.toJSON())
 })
 
 // Get a signed url to put a new item in the bucket
 router.get(
 	'/signed-url/:fileName',
-	requireAuth,
 	async (req: Request, res: Response) => {
 		let { fileName } = req.params
 		const url = AWS.getPutSignedUrl(fileName)
