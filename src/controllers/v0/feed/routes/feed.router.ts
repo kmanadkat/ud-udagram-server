@@ -27,7 +27,7 @@ router.get('/:id', async(req: Request, res: Response) => {
 })
 
 // update a specific resource
-router.patch('/:id', async (req: Request, res: Response) => {
+router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
 	const {id} = req.params
 	const {caption,url} = req.body
 	const feedItem = await FeedItem.findByPk(id)
@@ -47,6 +47,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
 // Get a signed url to put a new item in the bucket
 router.get(
 	'/signed-url/:fileName',
+	requireAuth,
 	async (req: Request, res: Response) => {
 		let { fileName } = req.params
 		const url = AWS.getPutSignedUrl(fileName)
